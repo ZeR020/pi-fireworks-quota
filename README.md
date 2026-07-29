@@ -1,5 +1,7 @@
 # pi-fireworks-quota
 
+[![npm version](https://img.shields.io/npm/v/pi-fireworks-quota.svg)](https://www.npmjs.com/package/pi-fireworks-quota) [![npm downloads](https://img.shields.io/npm/dm/pi-fireworks-quota.svg)](https://www.npmjs.com/package/pi-fireworks-quota) [![license](https://img.shields.io/npm/l/pi-fireworks-quota.svg)](https://github.com/ZeR020/pi-fireworks-quota/blob/main/LICENSE)
+
 `/fireworks:quota` — Fireworks AI balance, spend, tokens, and limits inside Pi.
 
 ## Install
