@@ -1,17 +1,20 @@
 # pi-fireworks-quota
 
-`/fireworks:quota` — Fireworks balance, month spend, tokens (incl. cached), and per-model $ for the active Pi key.
-
-No `firectl`. Pure Node gRPC to `gateway.fireworks.ai`.
+`/fireworks:quota` — Fireworks AI balance, spend, tokens, and limits inside Pi.
 
 ## Install
 
+From npm:
+
 ```bash
-pi install /path/to/pi-fireworks-quota
-cd /path/to/pi-fireworks-quota && npm install
+pi install npm:pi-fireworks-quota
 ```
 
-Needs Fireworks auth in Pi (`auth.json` / `FIREWORKS_API_KEY`).
+From GitHub:
+
+```bash
+pi install git:github.com/ZeR020/pi-fireworks-quota
+```
 
 ## Usage
 
@@ -21,15 +24,22 @@ Needs Fireworks auth in Pi (`auth.json` / `FIREWORKS_API_KEY`).
 
 | Tab | Content |
 | --- | --- |
-| Balance | Credit remaining, month spend |
-| Tokens | Month totals (compact) |
-| Models | Per-model tokens + $ · ←/→ Today / Week / Month (lazy load) |
-| Account | Email, key tail, RPM max |
+| Balance | Credits remaining and month spend against budget |
+| Tokens | Month totals: prompt, completion, cached, uncached, cache hit |
+| Models | Per-model tokens and spend; switch period with ←/→ |
+| Account | Email, account ID, state, API-key tail, serverless RPM limit |
 
-`r` refresh · `q`/Esc close · Tab switch tabs
+Keybindings:
 
-## Data sources (gRPC)
+- `Tab` / `Shift+Tab` — switch tabs
+- `r` — refresh
+- `q` / `Esc` — close
+- `←` / `→` — change period on the Models tab
 
-`ListAccounts` · `GetBalance` · `GetAccountUsage` · `GetBillingSummary` · `ListQuotas`
+## Requirements
 
-Internal control-plane API — can change without notice.
+Fireworks auth must be configured in Pi, either in `auth.json` or via the `FIREWORKS_API_KEY` environment variable.
+
+## Note
+
+This package calls Fireworks' internal gRPC control-plane API, which may change without notice.

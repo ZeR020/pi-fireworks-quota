@@ -3,12 +3,30 @@
   "version": "0.1.0",
   "description": "Pi command /fireworks:quota — Fireworks AI balance, spend, tokens, and limits",
   "license": "MIT",
+  "author": "ZeR020",
   "type": "module",
   "keywords": ["pi-package", "pi-extension", "pi", "fireworks"],
+  "homepage": "https://github.com/ZeR020/pi-fireworks-quota#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZeR020/pi-fireworks-quota.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ZeR020/pi-fireworks-quota/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "pi": {
     "extensions": ["./extensions/index.ts"]
   },
-  "files": ["src", "extensions", "README.md"],
+  "files": [
+    "src",
+    "extensions",
+    "README.md",
+    "package.json",
+    "tsconfig.json"
+  ],
   "dependencies": {
     "@grpc/grpc-js": "^1.14.4",
     "@grpc/proto-loader": "^0.8.1"
