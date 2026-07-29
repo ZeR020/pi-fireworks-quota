@@ -1,0 +1,35 @@
+name: release
+
+# Publish to npm when a GitHub Release is published.
+# Manual dispatch lets you publish the current package.json version on demand
+# (useful for the first publish, or re-running a failed release).
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write # required for `npm publish --provenance` (public repo, hosted runner)
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://registry.npmjs.org
+
+      # No `npm ci` here on purpose: devDependencies use local file: paths that
+      # do not exist on the runner. `npm publish` only packs the `files` list
+      # plus package.json metadata — it installs nothing, so this is safe.
+      - run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
