@@ -1,0 +1,61 @@
+name: CI
+
+# Quality gates on every push to main and every PR. No gate may be skipped.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to keep CI fast and cheap.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Shared across jobs: npm 12 honors the brace-expansion override that npm 11
+# silently drops (pi-coding-agent's nested minimatch tree). Keep this in sync
+# with the "overrides" note in package.json.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Use npm 12 (override handling)
+        run: npm install -g npm@12
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Use npm 12 (override handling)
+        run: npm install -g npm@12
+      - run: npm ci
+      - run: npm test
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Use npm 12 (override handling)
+        run: npm install -g npm@12
+      - run: npm ci
+      - name: Security audit (high severity and above)
+        run: npm audit --audit-level=high
