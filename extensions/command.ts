@@ -27,19 +27,32 @@ export function registerQuotasCommand(pi: ExtensionAPI): void {
 				let controller = new AbortController();
 				let fetchGen = 0;
 				let accountName = "";
+				// In-flight/done period fetches — background prefetch makes tab switches instant.
+				const periodCache = new Map<
+					UsagePeriod,
+					Promise<PeriodUsage | { error: string }>
+				>();
 
-				const ensurePeriod = async (
+				const ensurePeriod = (
 					period: UsagePeriod,
 				): Promise<PeriodUsage | { error: string }> => {
-					if (!accountName) return { error: "No account resolved" };
-					const out = await fetchPeriodUsage(
-						key,
-						accountName,
-						period,
-						controller.signal,
-					);
-					if (!out.success) return { error: out.error.message };
-					return out.data;
+					const pending = periodCache.get(period);
+					if (pending) return pending;
+					const promise = (async (): Promise<
+						PeriodUsage | { error: string }
+					> => {
+						if (!accountName) return { error: "No account resolved" };
+						const out = await fetchPeriodUsage(
+							key,
+							accountName,
+							period,
+							controller.signal,
+						);
+						if (!out.success) return { error: out.error.message };
+						return out.data;
+					})();
+					periodCache.set(period, promise);
+					return promise;
 				};
 
 				const component = new QuotasComponent(
@@ -52,6 +65,7 @@ export function registerQuotasCommand(pi: ExtensionAPI): void {
 					() => {
 						controller.abort();
 						controller = new AbortController();
+						periodCache.clear();
 						component.setState({ type: "loading" });
 						tui.requestRender();
 						void load();
@@ -66,6 +80,9 @@ export function registerQuotasCommand(pi: ExtensionAPI): void {
 					if (out.success) {
 						accountName = out.data.accountName;
 						component.setState({ type: "loaded", snap: out.data });
+						// Prefetch remaining periods so Models ←/→ is instant.
+						void ensurePeriod("today");
+						void ensurePeriod("week");
 					} else {
 						component.setState({
 							type: "error",

@@ -60,6 +60,22 @@ async function getClient(): Promise<GatewayClient> {
 	return client;
 }
 
+/**
+ * Fire-and-forget channel warmup at extension load. grpc-js connects lazily
+ * on first RPC; waitForReady forces TCP+TLS+HTTP2 now so the first real call
+ * skips the handshake. Never rejects.
+ */
+export async function warmup(): Promise<void> {
+	try {
+		const gateway = await getClient();
+		await new Promise<void>((resolve) => {
+			gateway.waitForReady(new Date(Date.now() + 10_000), () => resolve());
+		});
+	} catch {
+		// Warmup is best-effort; real calls surface their own errors.
+	}
+}
+
 async function unary<T>(
 	method: string,
 	request: object,
@@ -133,7 +149,12 @@ export function normModelLabel(s: string): string {
 		.replace(/(instruct|chat|code)$/g, "");
 }
 
-type ResolvedAccount = { name: string; id: string; email: string; state: string };
+type ResolvedAccount = {
+	name: string;
+	id: string;
+	email: string;
+	state: string;
+};
 
 /** Process-lifetime cache keyed by api key tail — skips ListAccounts on refresh. */
 const accountCache = new Map<string, ResolvedAccount>();
