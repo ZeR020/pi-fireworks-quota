@@ -1,11 +1,16 @@
 {
   "name": "pi-fireworks-quota",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pi command /fireworks:quota — Fireworks AI balance, spend, tokens, and limits",
   "license": "MIT",
   "author": "ZeR020",
   "type": "module",
-  "keywords": ["pi-package", "pi-extension", "pi", "fireworks"],
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "fireworks"
+  ],
   "homepage": "https://github.com/ZeR020/pi-fireworks-quota#readme",
   "repository": {
     "type": "git",
@@ -25,7 +30,9 @@
     "brace-expansion": "^5.0.8"
   },
   "pi": {
-    "extensions": ["./extensions/index.ts"]
+    "extensions": [
+      "./extensions/index.ts"
+    ]
   },
   "files": [
     "src",
@@ -43,8 +50,12 @@
     "@earendil-works/pi-tui": "*"
   },
   "peerDependenciesMeta": {
-    "@earendil-works/pi-coding-agent": { "optional": true },
-    "@earendil-works/pi-tui": { "optional": true }
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    },
+    "@earendil-works/pi-tui": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@earendil-works/pi-coding-agent": "^0.82.1",
