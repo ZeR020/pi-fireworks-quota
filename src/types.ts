@@ -16,7 +16,8 @@ export interface PeriodUsage {
 	rangeStart: string;
 	rangeEnd: string;
 	totalTokens: number;
-	spendUsd: number;
+	/** null when GetBillingSummary failed (e.g. "billing data temporarily unavailable"). */
+	spendUsd: number | null;
 	byModel: ModelUsage[];
 	promptTokens: number;
 	completionTokens: number;

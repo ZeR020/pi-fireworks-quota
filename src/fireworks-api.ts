@@ -73,6 +73,43 @@ function fail(
 	return { success: false, error: { message, kind } };
 }
 
+/** Soft-fail optional endpoints; still surface cancel/timeout. */
+async function optionalCall<T>(
+	p: Promise<T>,
+	signal: AbortSignal,
+	fallback: T,
+): Promise<T> {
+	try {
+		return await p;
+	} catch (err: unknown) {
+		if (isAbortError(err, signal)) throw err;
+		return fallback;
+	}
+}
+
+/** Fireworks GetBillingSummary flakes with "billing data is temporarily unavailable". */
+async function withRetry<T>(
+	fn: () => Promise<T>,
+	signal: AbortSignal,
+	attempts = 3,
+): Promise<T> {
+	let last: unknown;
+	for (let i = 0; i < attempts; i++) {
+		if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+		try {
+			return await fn();
+		} catch (err: unknown) {
+			last = err;
+			if (isAbortError(err, signal)) throw err;
+			// brief backoff before retry; skip sleep on last attempt
+			if (i < attempts - 1) {
+				await new Promise<void>((r) => setTimeout(r, 200 * (i + 1)));
+			}
+		}
+	}
+	throw last;
+}
+
 /** One period (today | week | month) — initial month + lazy Models ←/→. */
 export async function fetchPeriodUsage(
 	apiKey: string,
@@ -83,9 +120,25 @@ export async function fetchPeriodUsage(
 	const combined = combineSignals(signal);
 	try {
 		const range = periodRangeUtc(period);
+		// Tokens are required; billing is optional (Fireworks often 503s GetBillingSummary).
+		const emptySpend = {
+			totalUsd: null as number | null,
+			byModel: new Map<string, number>(),
+		};
 		const [tokens, spend] = await Promise.all([
 			fetchTokenUsage(apiKey, accountName, range, combined),
-			fetchSpendUsd(apiKey, accountName, range, combined),
+			optionalCall(
+				withRetry(
+					() =>
+						fetchSpendUsd(apiKey, accountName, range, combined).then((s) => ({
+							totalUsd: s.totalUsd as number | null,
+							byModel: s.byModel,
+						})),
+					combined,
+				),
+				combined,
+				emptySpend,
+			),
 		]);
 		return {
 			success: true,
@@ -124,9 +177,21 @@ export async function fetchFireworksQuota(
 	try {
 		const account = await resolveAccount(apiKey, combined);
 
+		// Balance/quotas optional — billing blips must not blank the whole UI.
 		const [balanceUsd, quotas, month] = await Promise.all([
-			fetchBalanceUsd(apiKey, account.name, combined),
-			fetchQuotas(apiKey, account.name, combined),
+			optionalCall(
+				withRetry(
+					() => fetchBalanceUsd(apiKey, account.name, combined),
+					combined,
+				),
+				combined,
+				null,
+			),
+			optionalCall(
+				fetchQuotas(apiKey, account.name, combined),
+				combined,
+				new Map(),
+			),
 			fetchPeriodUsage(apiKey, account.name, "month", combined),
 		]);
 

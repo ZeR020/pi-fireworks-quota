@@ -77,7 +77,9 @@ export function renderBalanceTab(
 	);
 	const spend = snap.models.month.spendUsd;
 	const budget = snap.monthBudgetUsd;
-	if (budget && budget > 0) {
+	if (spend === null) {
+		lines.push(labelValue("Spent", "unavailable", maxWidth, theme));
+	} else if (budget && budget > 0) {
 		const usedPct = Math.min(100, (spend / budget) * 100);
 		const left = Math.max(0, 100 - usedPct);
 		const sev = severityFromPercent(left);
@@ -123,7 +125,14 @@ export function renderTokensTab(
 		),
 	);
 	lines.push(labelValue("Total", formatTokens(m.totalTokens), maxWidth, theme));
-	lines.push(labelValue("Spend", formatUsd(m.spendUsd), maxWidth, theme));
+	lines.push(
+		labelValue(
+			"Spend",
+			m.spendUsd === null ? "unavailable" : formatUsd(m.spendUsd),
+			maxWidth,
+			theme,
+		),
+	);
 	lines.push(
 		labelValue("Prompt", formatTokens(m.promptTokens), maxWidth, theme),
 	);
@@ -184,9 +193,11 @@ export function renderModelsTab(
 
 	// Summary strip
 	const range = formatRangeLabel(usage.rangeStart, usage.rangeEnd);
+	const spendLabel =
+		usage.spendUsd === null ? "unavailable" : formatUsd(usage.spendUsd);
 	lines.push(
 		truncateToWidth(
-			`  ${theme.fg("dim", range)}  ·  ${theme.bold(formatTokens(usage.totalTokens))} tok  ·  ${theme.bold(formatUsd(usage.spendUsd))}`,
+			`  ${theme.fg("dim", range)}  ·  ${theme.bold(formatTokens(usage.totalTokens))} tok  ·  ${theme.bold(spendLabel)}`,
 			maxWidth,
 		),
 	);
@@ -220,7 +231,7 @@ export function renderModelsTab(
 		),
 	);
 
-	const totalSpend = Math.max(0, usage.spendUsd);
+	const totalSpend = Math.max(0, usage.spendUsd ?? 0);
 	const totalTok = Math.max(0, usage.totalTokens);
 
 	for (const m of usage.byModel) {
