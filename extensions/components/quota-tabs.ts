@@ -1,5 +1,5 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import { truncateToWidth } from "@earendil-works/pi-tui";
+import { truncateToWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
 import {
 	formatRangeLabel,
 	formatTokens,
@@ -181,7 +181,9 @@ export function renderModelsTab(
 
 	if (error) {
 		lines.push("");
-		lines.push(theme.fg("error", `  ${error}`));
+		lines.push(
+			...wrapTextWithAnsi(theme.fg("error", `  ${error}`), maxWidth),
+		);
 		return lines;
 	}
 

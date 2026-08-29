@@ -1,6 +1,6 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { DynamicBorder } from "@earendil-works/pi-coding-agent";
-import { Loader, matchesKey, truncateToWidth } from "@earendil-works/pi-tui";
+import { Loader, matchesKey, truncateToWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
 import { USAGE_PERIODS, type UsagePeriod } from "../../src/format";
 import type { FireworksQuotaSnapshot, PeriodUsage } from "../../src/types";
 import {
@@ -162,7 +162,12 @@ export class QuotasComponent {
 				]),
 			);
 		} else if (this.state.type === "error") {
-			lines.push(this.theme.fg("error", `  ${this.state.message}`));
+			lines.push(
+				...wrapTextWithAnsi(
+					this.theme.fg("error", `  ${this.state.message}`),
+					width,
+				),
+			);
 		} else {
 			lines.push(...this.renderLoaded(this.state.snap, contentWidth, width));
 		}
