@@ -27,9 +27,7 @@ jobs:
           node-version: "20"
           registry-url: https://registry.npmjs.org
 
-      # No `npm ci` here on purpose: devDependencies use local file: paths that
-      # do not exist on the runner. `npm publish` only packs the `files` list
-      # plus package.json metadata — it installs nothing, so this is safe.
+      # Publishing packs the allowlisted source files without installing dependencies.
       - run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

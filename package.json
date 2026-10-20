@@ -1,6 +1,6 @@
 {
   "name": "pi-fireworks-quota",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Pi commands /fireworks:quota and /fireworks:test-key — Fireworks AI balance, spend, tokens, and limits",
   "license": "MIT",
   "author": "ZeR020",
