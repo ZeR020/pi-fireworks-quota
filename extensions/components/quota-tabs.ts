@@ -227,7 +227,7 @@ export function renderModelsTab(
 		truncateToWidth(
 			theme.fg(
 				"dim",
-				`  ${"─".repeat(Math.min(contentWidth - 2, nameW + tokW + spendW + shareBarW + pctW + 8))}`,
+				`  ${"─".repeat(Math.max(0, Math.min(contentWidth - 2, nameW + tokW + spendW + shareBarW + pctW + 8)))}`,
 			),
 			maxWidth,
 		),

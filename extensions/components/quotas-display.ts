@@ -79,12 +79,13 @@ export class QuotasComponent {
 	private ensureCurrentPeriod(): void {
 		if (this.state.type !== "loaded") return;
 		const period = this.currentPeriod();
-		if (this.state.snap.models[period]) return;
 		if (this.periodLoading === period) return;
 
 		const gen = ++this.periodFetchGen;
-		this.periodLoading = period;
+		this.periodLoading = null;
 		this.periodError = null;
+		if (this.state.snap.models[period]) return;
+		this.periodLoading = period;
 		this.tui.requestRender();
 
 		void this.onEnsurePeriod(period).then((result) => {
@@ -116,24 +117,24 @@ export class QuotasComponent {
 			this.onRefetch();
 			return true;
 		}
-		if (data === "\t") {
+		if (matchesKey(data, "tab")) {
 			this.activeTab = (this.activeTab + 1) % TABS.length;
 			if (this.activeTab === MODELS_TAB) this.ensureCurrentPeriod();
 			return true;
 		}
-		if (data === "\x1b[Z") {
+		if (matchesKey(data, "shift+tab")) {
 			this.activeTab = (this.activeTab - 1 + TABS.length) % TABS.length;
 			if (this.activeTab === MODELS_TAB) this.ensureCurrentPeriod();
 			return true;
 		}
 		if (this.activeTab === MODELS_TAB) {
-			if (data === "\x1b[C") {
+			if (matchesKey(data, "right")) {
 				this.modelsPeriodIdx =
 					(this.modelsPeriodIdx + 1) % USAGE_PERIODS.length;
 				this.ensureCurrentPeriod();
 				return true;
 			}
-			if (data === "\x1b[D") {
+			if (matchesKey(data, "left")) {
 				this.modelsPeriodIdx =
 					(this.modelsPeriodIdx - 1 + USAGE_PERIODS.length) %
 					USAGE_PERIODS.length;
@@ -177,7 +178,7 @@ export class QuotasComponent {
 		lines.push("");
 		lines.push(this.theme.fg("dim", `  ${hints.join("  ")}`));
 		lines.push(...border.render(width));
-		return lines;
+		return lines.map((line) => truncateToWidth(line, width));
 	}
 
 	private renderLoaded(
