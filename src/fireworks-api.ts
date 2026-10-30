@@ -5,7 +5,7 @@ import {
 	fetchSpendUsd,
 	fetchTokenUsage,
 	resolveAccount,
-} from "./fireworks-grpc";
+} from "./fireworks-rest";
 import { keyTail, periodRangeUtc, type UsagePeriod } from "./format";
 import type {
 	FetchErrorKind,
@@ -69,7 +69,7 @@ function fail(
 		"kind" in err &&
 		(err as { kind?: string }).kind === "timeout"
 			? "timeout"
-			: "grpc";
+			: "http";
 	return { success: false, error: { message, kind } };
 }
 
@@ -101,6 +101,7 @@ async function withRetry<T>(
 		} catch (err: unknown) {
 			last = err;
 			if (isAbortError(err, signal)) throw err;
+			if ((err as { permanent?: boolean }).permanent) throw err;
 			// brief backoff before retry; skip sleep on last attempt
 			if (i < attempts - 1) {
 				await new Promise<void>((r) => setTimeout(r, 200 * (i + 1)));

@@ -9,7 +9,7 @@ import {
 	periodRangeUtc,
 	severityFromPercent,
 } from "../src/format";
-import { normModelLabel } from "../src/fireworks-grpc";
+import { normModelLabel } from "../src/fireworks-rest";
 
 describe("formatUsd", () => {
 	it("formats normal amounts to 2 decimals", () => {

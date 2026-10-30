@@ -1,6 +1,6 @@
 import type { UsagePeriod } from "./format";
 
-export type FetchErrorKind = "cancelled" | "timeout" | "config" | "grpc";
+export type FetchErrorKind = "cancelled" | "timeout" | "config" | "http";
 
 export interface ModelUsage {
 	model: string;

@@ -51,4 +51,4 @@ Fireworks auth must be configured in Pi, either in `auth.json` or via the `FIREW
 
 ## Note
 
-This package calls Fireworks' internal gRPC control-plane API, which may change without notice.
+This package calls Fireworks' REST control-plane API (`api.fireworks.ai/v1`, Bearer API-key auth). Balance is unavailable when Fireworks denies the undocumented `:getBalance` endpoint for API keys; all other data comes from documented endpoints.
